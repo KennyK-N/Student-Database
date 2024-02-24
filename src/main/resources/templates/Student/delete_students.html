@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delete Student</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        /*disable horizontal scroll*/
+        overflow-x: hidden;
+        /*Use google custom font*/
+        font-family: "Roboto", sans-serif;
+      }
+      /*to make website more friendly and better viewing experience for smaller screens */
+      @media (max-width: 1200px) {
+        /*unset fontsize*/
+        .card-body {
+          font-size: unset !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!--Navbar for redirecting between, update, view, delete, add-->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container-fluid">
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" aria-current="page" href="/view">View</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/addStudent">Add</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="/deleteStudent">Delete</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/updateStudent">Update</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <form action="/Student/deleted_multi" method="post">
+      <div class="container-fluid">
+        <div class="row justify-content-center">
+          <!--Displays alert message if it exists for success or failure-->
+          <div class="col-md-4">
+            <div
+              th:if="${message}"
+              th:class="'alert ' + ${flash} + ' alert-dismissible fade show'"
+              role="alert"
+            >
+              <p
+                class="text-break text-lg-center mb-0"
+                th:text="${message}"
+              ></p>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
+            </div>
+          </div>
+          <!--title-->
+          <h1 class="text-center mt-5 mb-4">Delete Student(s)</h1>
+          <!--Displays alert message if user table is empty-->
+          <div class="col-md-auto">
+            <div
+              th:if="${#lists.size(us) <= 0}"
+              th:class="'alert alert-danger alert-dismissible fade show'"
+              role="alert"
+            >
+              <p class="text-break text-lg-center mb-0">
+                No student in Database!
+              </p>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
+            </div>
+          </div>
+          <!--display all current student from database-->
+          <div class="col-sm-auto p-4" th:each="user, iterStat : ${us}">
+            <div class="card text-white bg-dark mb-3">
+              <div
+                class="card-body d-flex justify-content-center align-items-center"
+              >
+                <div class="container">
+                  <!--display student name-->
+                  <div class="row pt-sm-1">
+                    <div class="col">
+                      <p
+                        class="text-break text-sm-center mb-0"
+                        th:text="'Name: ' + ${user.name}"
+                      ></p>
+                    </div>
+                  </div>
+                  <!--display student gpa-->
+                  <div class="row pt-sm-1">
+                    <div class="col">
+                      <p
+                        class="text-break text-sm-center mb-0"
+                        th:text="'Gpa: ' + ${user.gpa}"
+                      ></p>
+                    </div>
+                  </div>
+                  <!--display student weight-->
+                  <div class="row pt-sm-1">
+                    <div class="col">
+                      <p
+                        class="text-break text-sm-center mb-0"
+                        th:text="'Weight: ' + ${user.weight}"
+                      ></p>
+                    </div>
+                  </div>
+                  <!--display student height-->
+                  <div class="row pt-sm-1">
+                    <div class="col">
+                      <p
+                        class="text-break text-sm-center mb-0"
+                        th:text="'Height: ' + ${user.height}"
+                      ></p>
+                    </div>
+                  </div>
+                  <!--display a selectable button that user can click on to delete student-->
+                  <div class="row pt-3">
+                    <div class="col">
+                      <input
+                        type="checkbox"
+                        th:id="'btn-check-' + ${user.uid} + '-outlined'"
+                        th:checked="${false}"
+                        th:value="${user.uid} + ' ' + ${iterStat.index}"
+                        name="userCheckbox"
+                        th:required="${false}"
+                        class="btn-check"
+                      />
+                      <label
+                        class="btn btn-outline-danger w-100"
+                        th:for="'btn-check-' + ${user.uid} + '-outlined'"
+                        ><i class="fas fa-trash-alt"></i></label
+                      ><br />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- display a button that submits to form if size of student database is greater than equal to 1-->
+      <div
+        class="row justify-content-center pt-10"
+        th:if="${#lists.size(us) >= 1}"
+      >
+        <div class="col-md-12 text-center">
+          <input
+            class="btn btn-primary w-50"
+            type="submit"
+            value="DELETE SELECTED"
+          />
+        </div>
+      </div>
+    </form>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
