@@ -111,6 +111,7 @@
                       th:data-bs-target="'#collapse' + ${iterStat.index}"
                       aria-expanded="false"
                       th:aria-controls="'collapse' + ${iterStat.index}"
+                      onclick="reset_link()"
                     >
                       <span th:text="'Student: ' + ${user.name}"></span>
                     </button>
@@ -230,6 +231,10 @@
       crossorigin="anonymous"
     ></script>
     <script th:inline="javascript">
+      function reset_link() {
+        // Reset the url to "/updateStudent"
+        history.pushState(null, "", "/updateStudent");
+      }
       document.addEventListener("DOMContentLoaded", function () {
         // Check if there's a hash (#) in the URL
         const hash = window.location.hash;
@@ -245,10 +250,12 @@
             // Wait for the collapse animation to finish before scrolling into view
             accordionItem.addEventListener("shown.bs.collapse", function () {
               // Scroll the accordion item into view into user perspective
-              accordionItem.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              });
+              if (!hash || window.location.hash === hash) {
+                accordionItem.scrollIntoView({
+                  behavior: "smooth",
+                  block: "start",
+                });
+              }
             });
           }
         }
