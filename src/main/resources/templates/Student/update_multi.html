@@ -75,20 +75,24 @@
           <!--title-->
           <h1 class="text-center mt-5 mb-4">Update</h1>
           <!--Displays alert message if user table is empty-->
-          <div
-            th:if="${#lists.size(us) <= 0}"
-            th:class="'alert alert-danger alert-dismissible fade show'"
-            role="alert"
-          >
-            <p class="text-break text-lg-center mb-0">
-              No student in Database!
-            </p>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="alert"
-              aria-label="Close"
-            ></button>
+          <div class="row justify-content-center">
+            <div class="col-md-auto">
+              <div
+                th:if="${#lists.size(us) <= 0}"
+                th:class="'alert alert-danger alert-dismissible fade show'"
+                role="alert"
+              >
+                <p class="text-break text-lg-center mb-0">
+                  No student in Database!
+                </p>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="alert"
+                  aria-label="Close"
+                ></button>
+              </div>
+            </div>
           </div>
           <!--form for submiting info to server side-->
           <form action="/Student/updated" method="post">
@@ -162,6 +166,21 @@
                           th:id="${user.haircolor} + ' ' + ${user.uid}"
                           th:value="${user.haircolor}"
                           th:placeholder="${user.haircolor}"
+                          class="form-control border-secondary"
+                        />
+                      </div>
+                      <!--input section for editing the students favouritecolor-->
+                      <div class="col-md-12 mb-3">
+                        <label
+                          th:for="${user.favouritecolor} + ' ' + ${user.uid}"
+                          >favouritecolor:
+                        </label>
+                        <input
+                          type="color"
+                          th:name="'favouritecolor' + ${iterStat.index}"
+                          th:id="${user.favouritecolor} + ' ' + ${user.uid}"
+                          th:value="${user.favouritecolor}"
+                          th:placeholder="${user.favouritecolor}"
                           class="form-control border-secondary"
                         />
                       </div>

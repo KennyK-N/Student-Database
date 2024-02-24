@@ -19,9 +19,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import trackstudentapp.track_student_app.models.student;
 import trackstudentapp.track_student_app.models.StudentRepository;
+import java.awt.Color;
 // marks a Java class as a controller, responsible for handling HTTP requests and generating responses.
 @Controller
 public class student_controller {
+    public static boolean isShadeOfWhite(Color color) {
+        // Get the red, green, and blue components of the color
+        int red = color.getRed();
+        int green = color.getGreen();
+        int blue = color.getBlue();
+        // Check if the color is a shade of white or a really light color
+        // check if the color is very close to white by ensuring each color component is above a certain threshold
+        int threshold = 230; 
+        return red >= threshold && green >= threshold && blue >= threshold;
+    }
     //"@Autowired" injects an instance of "StudentRepository" into the field "studentrepo".
     @Autowired
     private StudentRepository studentrepo;
@@ -50,23 +61,36 @@ public class student_controller {
     public String redirectToAddPage() {
         return "Student/add";
     }
+    
     // A post endpoint that connects the form the from the addstudent webpage to the server
     // this is the endpoint that will store data onto the table
     @PostMapping("/Student/additem")
     public String addUser(@RequestParam Map<String, String> newstudent, HttpServletResponse response, RedirectAttributes redirectAttributes){
+        // gets the colors from the input box from the form
+        Color rgbColor = Color.decode(newstudent.get("haircolor"));
+        Color rgbColor_2 = Color.decode(newstudent.get("favouritecolor"));
+        // checks if the color from the input box is white or very close to white, if so, redirect to add student
+        if(isShadeOfWhite(rgbColor) || isShadeOfWhite(rgbColor_2) ){
+            redirectAttributes.addFlashAttribute("message", "One of your color is a shade of white, please choose a darker color." + 
+            " If all 3 RGB values are the same and above 230, the color is considered a shade of white.");
+            redirectAttributes.addFlashAttribute("flash", "alert-danger");
+            return "redirect:/addStudent";
+        }
         // checks if non of the values from the input boxes are empty
         if(!newstudent.get("name").isEmpty() && !newstudent.get("haircolor").isEmpty()
          && !newstudent.get("height").isEmpty() 
-        && !newstudent.get("weight").isEmpty() && !newstudent.get("gpa").isEmpty())
+        && !newstudent.get("weight").isEmpty() && !newstudent.get("gpa").isEmpty()
+        && !newstudent.get("favouritecolor").isEmpty())
         {
             //gets the attributes from the input boxes are converts to their correct type
             String newName = newstudent.get("name");
             String haircolor = newstudent.get("haircolor");
+            String favouritecolor = newstudent.get("favouritecolor");
             int height = Integer.parseInt(newstudent.get("height"));
             int weight = Integer.parseInt(newstudent.get("weight"));
             Float gpa = Float.parseFloat(newstudent.get("gpa"));
             // generates a new student into the database with the attributes recieved above
-            studentrepo.save(new student(newName, weight, height, haircolor, gpa));
+            studentrepo.save(new student(newName, weight, height, haircolor, gpa, favouritecolor));
             // indicate that we successfully added a newstudent
             redirectAttributes.addFlashAttribute("message", "student added successfully!");
             redirectAttributes.addFlashAttribute("flash", "alert-success");
@@ -102,10 +126,10 @@ public class student_controller {
     // A post endpoint that connects the form the from the update student webpage to the server
     // this is the endpoint that will modify existing data on the table
     @PostMapping("/Student/updated")
-    public String Updaitng_Multi_user(@RequestParam Map<String, String> newuser, HttpServletRequest request, 
+    public String Updaitng_Multi_user(@RequestParam Map<String, String> newstudent, HttpServletRequest request, 
     RedirectAttributes redirectAttributes) {
-        //flag to check whether at least one student was successfully updated
-        Boolean flag = true;
+        //gets all student sorted by alphabetical order in student name
+        List<student> users = studentrepo.findAll(Sort.by(Sort.Direction.ASC, "name"));
         // gets length of current database for students
         int length = studentrepo.findAll().size();
         // if length is 0, // indicate that we did not sucessfully updated any student, and redirect to update page
@@ -114,17 +138,31 @@ public class student_controller {
             redirectAttributes.addFlashAttribute("flash", "alert-danger");
             return "redirect:/updateStudent";
         } 
-        //gets all student sorted by alphabetical order in student name
-        List<student> users = studentrepo.findAll(Sort.by(Sort.Direction.ASC, "name"));
+        //iterates:
+        for(int i =0; i < length; i++){
+            // gets the colors from the input box from the form
+            Color rgbColor = Color.decode(newstudent.get("haircolor"+Integer.toString(i)));
+            Color rgbColor_2 = Color.decode(newstudent.get("favouritecolor"+Integer.toString(i)));
+            // checks if the color from the input box is white or very close to white, if so, redirect to add student
+            if(isShadeOfWhite(rgbColor) || isShadeOfWhite(rgbColor_2)){
+                redirectAttributes.addFlashAttribute("message", "One or more color is similar to shade of white," +
+                " please choose a darker color. If all 3 RGB values are the same and above 230, the color is considered a shade of white.");
+                redirectAttributes.addFlashAttribute("flash", "alert-danger");
+                return "redirect:/updateStudent";
+            }
+        }
+        //flag to check whether at least one student was successfully updated
+        Boolean flag = true;
         //itterate:
         for (int i = 0; i < length; i++) {
             //gets the attributes from the input boxes and converts them to string type
-            String name = newuser.get("name"+Integer.toString(i));
-            String haircolor = newuser.get("haircolor"+Integer.toString(i));
-            String gpas = newuser.get("gpa"+Integer.toString(i));
-            String uid = newuser.get("uid_info"+Integer.toString(i));
-            String weights = newuser.get("weight"+Integer.toString(i));
-            String heights = newuser.get("height"+Integer.toString(i));
+            String name = newstudent.get("name"+Integer.toString(i));
+            String haircolor = newstudent.get("haircolor"+Integer.toString(i));
+            String gpas = newstudent.get("gpa"+Integer.toString(i));
+            String uid = newstudent.get("uid_info"+Integer.toString(i));
+            String weights = newstudent.get("weight"+Integer.toString(i));
+            String heights = newstudent.get("height"+Integer.toString(i));
+            String favouritecolor = newstudent.get("favouritecolor"+Integer.toString(i));
             //get an existing student by the uid we extracted from the input boxes
             Optional<student> existingUser = studentrepo.findById(Integer.parseInt(uid));
             //check if the existing student with that uid exists, and compare 
@@ -140,14 +178,15 @@ public class student_controller {
                 int height = Integer.parseInt(heights);
                 // check to make sure that the current student and their attribute does not all equal
                 // the same as the attributes we got from the inputboxes 
-                if(!curr.getName().equals(name) || !curr.getHaircolor().equals(haircolor)
+                if(!curr.getName().equals(name) || !curr.getHaircolor().equals(haircolor) || !curr.getFavouritecolor().equals(favouritecolor)
                  || !compareDecimals(curr.getGpa(), gpa) ||curr.getWeight()!=weight || curr.getHeight()!=height){
-                    //updates existing user with their new attributes
+                    //updates existing user with their new updated attributes we aquired from the form
                     curr.setName(name);
                     curr.setHaircolor(haircolor);
                     curr.setGpa(gpa);
                     curr.setWeight(weight);
                     curr.setHeight(height);
+                    curr.setFavouritecolor(favouritecolor);
                     studentrepo.save(curr);
                     // indicate that we successfully updated a student
                     if(flag==true){

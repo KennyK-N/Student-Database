@@ -21,16 +21,19 @@ public class student {
     private int height;
     // store student hair color
     private String haircolor;
+    // store student favourite color
+    private String favouritecolor;
     // default constructor
     public student(){
     }
     //parametric contstructor to create new student
-    public student(String name, int weight, int height, String haircolor, Float gpa){
+    public student(String name, int weight, int height, String haircolor, Float gpa, String favouritecolor){
         this.name = name;
         this.weight = weight;
         this.height = height;
         this.haircolor = haircolor;
         this.gpa = gpa;
+        this.favouritecolor = favouritecolor;
     }
     // returns student uid
     public int getUid() {
@@ -80,6 +83,12 @@ public class student {
     public void setHaircolor(String haircolor) {
         this.haircolor = haircolor;
     }
-    
-    
+    // returns student favouritecolor
+    public String getFavouritecolor() {
+        return favouritecolor;
+    }
+    // set student favourite colour
+    public void setFavouritecolor(String favouritecolor) {
+        this.favouritecolor = favouritecolor;
+    }
 }
